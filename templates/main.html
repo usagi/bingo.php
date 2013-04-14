@@ -1,0 +1,211 @@
+<article>
+  <article>
+    <h1>commands</h1>
+    <ul>
+      <li><a
+            href="javascript: void(0)"
+            onClick="command('main')"
+            >refresh</a>
+      <li><a
+            href="javascript: void(0)"
+            onClick="command('logout')"
+            >logout</a>
+    </ul>
+  </article>
+  {if $is_wheel}
+  <article>
+    <h1>wheel commands</h1>
+    <ul>
+      <li><a
+            href="javascript: void(0)"
+            onClick="command('reset',null,function() { command('main'); } )"
+            >reset</a>
+      <li><a
+            href="javascript: void(0)"
+            onClick="command('lot', { option:'lot' } );"
+            >lot</a>
+      <li><a
+            href="javascript: void(0)"
+            onClick="command('wheel',null,function(a) { for(var k in a.return)console.log(a.return[k]); } )"
+            >wheel-read</a>
+    </ul>
+  </article>
+  {/if}
+  <article id="player_me">
+    <h1>player info(me): 0 bingo!! / 0 reach!</h1>
+    <div class="card"></div>
+    <table>
+    {foreach from=range(0,4) item=y}
+      <tr class="y_{$y}">
+        {foreach from=range(0,4) item=x}
+        <td class="x_{$x}">?
+        {/foreach}
+    {/foreach}
+    </table>
+    <script>
+      $(function(){
+        var f = function()
+        {
+          command('card', null, function(a){
+            if( ! a.has_error )
+            {
+              var card = a.return
+              for(var k in card)
+              {
+                var cell = card[k];
+                var x = cell[0];
+                var y = cell[1];
+                var n = cell[2];
+                var p = cell[3];
+                var e = $('#player_me .y_' + y + ' .x_' + x);
+                e.html(n);
+                if( (p == 1) && (! e.hasClass('punched')) )
+                  e.addClass('punched');
+              }
+            }
+          })
+        };
+        if(typeof refresh_timer === typeof void(0))
+          refresh_timer = {};
+        if(!refresh_timer['main'])
+          refresh_timer['main'] = setInterval(f, 1000);
+        f();
+      });
+    </script>
+  </article>
+  <article id="player_others">
+    <h1>other players: total 0 bingo!! / total 0 reach!</h1>
+    {foreach from=$players_others item=p}
+    <article id="player_xxx">
+      <h1>{$p.name}</h1>
+      <table>
+        {foreach from=$p.card_rows item=r}
+        <tr>
+          {foreach from=$r item=v}
+          <td 
+            {if $v.is_punched}
+            class="punched"
+            {/if }
+            >{$v.number}
+          {/foreach}
+        {/foreach}
+      </table>
+    </article>
+    {/foreach}
+  </article>
+  <article>
+    <header><h1>lotter status</h1></header>
+    <h2>lotter</h2>
+    <table>
+      <tr id="lotter">
+    </table>
+    <h2>hisotory</h2>
+    <table>
+      <tr id="history_s">
+      <tr id="history_n">
+    </table>
+    <script>
+      $(function(){
+        var f = function()
+        {
+          command('lot', null, function(a){
+            if( ! a.has_error )
+            {
+              var lotter  = a.return[0];
+              var history = a.return[1];
+              
+              var ra = '';
+              for(var k in lotter)
+              {
+                var lk = lotter[k];
+                var n = lk[0];
+                var p = lk[1];
+                ra += '<td' + (p==1?' class="punched"':'') + '>' + n;
+              }
+              $('#lotter').html(ra);
+              
+              var rb_s = '';
+              var rb_n = '';
+              for(var k in history)
+              {
+                var lk = history[k];
+                var s = lk[0];
+                var n = lk[1];
+                rb_s += '<td>' + s;
+                rb_n += '<td class="punched">' + n;
+              }
+              $('#history_s').html(rb_s);
+              $('#history_n').html(rb_n);
+            }
+          })
+        };
+        if(typeof refresh_timer === typeof void(0))
+          refresh_timer = {};
+        if(!refresh_timer['lot'])
+          refresh_timer['lot'] = setInterval(f, 1000);
+        f();
+      });
+    </script>
+  </article>
+</article>
+
+{if $debug}
+<div class="debug">
+  <hr>
+  <h1>debug</h1>
+
+  <div id="players">
+    <header><h1>players</h1></header>
+    <table id="players_table">
+      <tr>
+        <th>name
+        <th>n_reach
+        <th>n_bingo
+      {foreach from=$players item=player}
+      <tr>
+        <td>{$player.name}
+        <td>{$player.n_reach}
+        <td >{$player.n_bingo}
+      {/foreach}
+    </table>
+    <script>
+      $(function(){
+        var f = function()
+        {
+          command('player', null, function(a){
+            if( ! a.has_error )
+            {
+              var players = a.return
+              var r = '<tr><th>name<th>n_reach<th>n_bingo';
+              for(var k in players)
+              {
+                var player  = players[k];
+                var name    = player[0];
+                var n_reach = player[1];
+                var n_bingo = player[2];
+                r += '<tr><td>' + name
+                   + '<td>' + n_reach
+                   + '<td>' + n_bingo
+                   ;
+              }
+              $('#players_table').html(r);
+            }
+          })
+        };
+        if(typeof refresh_timer === typeof void(0))
+          refresh_timer = {};
+        if(!refresh_timer['player'])
+          refresh_timer['player'] = setInterval(f, 1000);
+        f();
+      });
+    </script>
+  </div>
+
+  <hr>
+  <a href="javascript:void(0);"
+    onClick="command('schedule_show')"
+    >
+    test
+  </a>
+<div>
+{/if}
