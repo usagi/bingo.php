@@ -29,7 +29,7 @@ final class includes_t
   private $log4php  = 'include.external/log4php/Logger.php';
   private $smarty   = 'include.external/smarty/Smarty.class.php';
   private $helper   = 'include/helper.php';
-  private $reciever = 'include/reciever_t.php';
+  private $receiver = 'include/receiver_t.php';
   private $invoker  = 'include/invoker_t.php';
 }
 
@@ -42,13 +42,13 @@ function configure_logging()
 }
 
 final class main_t
-{ private $reciever;
+{ private $receiver;
   static public $database;
 
   public function __construct()
   { global $log;
     $log->info('main_t::__construct');
-    $this->reciever = new reciever_t;
+    $this->receiver = new receiver_t;
     self::$database = new PDO(conf::database_dsn);
     $log->info('database is opened ( '.conf::database_dsn.' )');
   }
@@ -70,7 +70,7 @@ final class main_t
     }
     
     if( array_key_exists(conf::command_json_key, $_REQUEST) )
-      $this->reciever->__invoke( $_REQUEST[conf::command_json_key] );
+      $this->receiver->__invoke( $_REQUEST[conf::command_json_key] );
     else
       $this->view_top();
       
